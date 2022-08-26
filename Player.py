@@ -3,13 +3,20 @@ def getCleanMoney(money: int) -> str:
     return (" ".join([money[i:i+3] for i in range(0, len(money), 3)]))[::-1] + "$"
 
 
+def getActionNumber(player) -> int:
+    total = 0
+    for action in player.actions:
+        if action.possessors.get(player) is not None:
+            total += action.possessors.get(player)
+    return total
+
+
 class Player:
 
-    def __init__(self, name: str, money: int, gold: int, action_nb: int, debt: int, base_start: int, actions):
+    def __init__(self, name: str, money: int, gold: int, debt: int, base_start: int, actions):
         self.name = name
         self.money = money
         self.gold = gold
-        self.actionNumber = action_nb
         self.actions = actions
         self.debt = debt
         self.base_start = base_start
@@ -25,7 +32,6 @@ class Player:
             return "Error : you don't have enough money"
         self.money -= value
         action.add(self)
-        self.actionNumber += 1
         action.value = value
         return f"{self.name} bought {action.name} for {getCleanMoney(value)}. He now has {getCleanMoney(self.money)}"
 
@@ -35,7 +41,6 @@ class Player:
             return f"Error : You don't have enough action of type {action.char} left"
         self.money += value * action.value
         action.remove(self, value)
-        self.actionNumber -= value
         if action.to_buy == 10:
             action.value = 1000
         return f"{self.name} sold {action.name} ({value}). He now has {getCleanMoney(self.money)}"
@@ -53,7 +58,7 @@ class Player:
         return f"{self.name} has now {getCleanMoney(self.money)}"
 
     def control(self) -> str:
-        total = int(self.money - 100 * int(0.3 * (self.money + 1000 * (self.actionNumber + self.gold))/100))
+        total = int(self.money - 100 * int(0.3 * (self.money + 1000 * (getActionNumber(self) + self.gold))/100))
         if total < 0:
             self.money = 0
             return f"{self.name} still need to pay {getCleanMoney(-total)}"
@@ -62,7 +67,7 @@ class Player:
             return f"{self.name} has now {getCleanMoney(self.money)}"
 
     def crises(self) -> str:
-        total = int(self.money - 100 * int(0.9 * (self.money + 1000 * (self.actionNumber + self.gold))/100))
+        total = int(self.money - 100 * int(0.9 * (self.money + 1000 * (getActionNumber(self) + self.gold))/100))
         if total < 0:
             self.money = 0
             return f"{self.name} still need to pay {getCleanMoney(-total)}"
@@ -87,11 +92,11 @@ class Player:
             return None
 
     def bank(self) -> str:
-        self.money += int((0.1 * (self.money + 1000 * (self.actionNumber + self.gold)))/100)*100
+        self.money += int((0.1 * (self.money + 1000 * (getActionNumber(self) + self.gold)))/100)*100
         return f"{self.name} now has {getCleanMoney(self.money)}"
 
     def start(self) -> str:
-        self.money += self.base_start + 200 * self.gold + 100 * self.actionNumber
+        self.money += self.base_start + 200 * self.gold + 100 * getActionNumber(self)
         if self.debt * 500 > self.money:
             value = getCleanMoney(self.debt*500 - self.money)
             self.money = 0
@@ -110,6 +115,7 @@ class Player:
         if value <= 0:
             return "Debt must be positive"
         self.debt += value
+        self.money += value*10000
         return f"{self.name} now has {getCleanMoney(self.debt*10000)} of debt and {getCleanMoney(self.money)}"
 
     def removeDebt(self, value: int):

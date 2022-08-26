@@ -48,10 +48,10 @@ if read == "yes":
                     actions[i].value = int(line[1])
                     actions[i].to_buy = int(line[2])
             else:
-                player = Player(line[0], int(line[1]), int(line[2]), int(line[3]), int(line[5]), int(line[6]), actions)
+                player = Player(line[0], int(line[1]), int(line[2]), int(line[4]), int(line[5]), actions)
                 gold_number -= int(line[2])
                 a = 1
-                while a <= int(line[4]):
+                while a <= int(line[3]):
                     action_line = lines[a + i].split(" ")
                     player.getAction(action_line[0]).possessors[player] = int(action_line[1])
                     a += 1
@@ -65,7 +65,7 @@ else:
         "\n\n    Players :\n\n  --  Example  --\nnicolas,a;antoine,u\n  ----------------\n\n").split(';')
     for player in init_players:
         data = player.split(",")
-        player = Player(data[0], initial_money, 0, 1, 0, 0, actions)
+        player = Player(data[0], initial_money, 0, 0, 0, actions)
         player.getAction(data[1]).add(player)
         players.append(player)
 
@@ -161,7 +161,8 @@ while True:
                     if action.char == command[1]:
                         success = True
                         for player in action.possessors.keys():
-                            print(player.addMoney(int(action.possessors.get(player) * int(command[2]) * 100)))
+                            if action.possessors.get(player) > 0:
+                                print(player.addMoney(int(action.possessors.get(player) * int(command[2]) * 100)))
                 if not success:
                     print("No one has this action")
             elif command[0] == "calc":
@@ -180,8 +181,8 @@ while True:
                             if nb is not None and nb > 0:
                                 action_string += f"{action.char} {nb}\n"
                                 action_type_nb += 1
-                        file.write(f"{player.name} {player.money} {player.gold} {player.actionNumber} {action_type_nb} {player.debt} {player.base_start}\n")
-                        file.write(action_string)
+                        file.write(f"{player.name} {player.money} {player.gold} {action_type_nb} {player.debt} {player.base_start}\n")
+                        file.write(action_string + "\n")
             elif command[1] == "buyd":
                 if actions[1].to_buy < 3:
                     print("There isn't enough diamond")
