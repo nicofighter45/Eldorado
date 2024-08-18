@@ -138,7 +138,7 @@ while True:
                   "\n  <player> bank                      : get your money from the bank"
                   "\n  <player> start                     : get your money from the start case"
                   "\n  <player> setstart <amount>         : set bonus start of a player"
-                  "\b  calc <calcul>                      : calcul anything"
+                  "\n  calc <calcul>                      : calcul anything"
                   )
         else:
             command = command.split(" ")
